@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +11,6 @@ import (
 	"pss/pkg"
 	"pss/pkg/handler"
 	"time"
-	"github.com/gorilla/mux"
 )
 
 const GetVersionEndpoint = "/version"

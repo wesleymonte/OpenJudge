@@ -36,6 +36,7 @@ func SaveProblem(p Problem) (interface{}, error){
 }
 
 func RetrieveProblem(problemId string) (*Problem, error) {
+	log.Println("Retriving problem [" + problemId + "]")
 	pId, err := primitive.ObjectIDFromHex(problemId)
 
 	if err != nil {
@@ -49,11 +50,7 @@ func RetrieveProblem(problemId string) (*Problem, error) {
 
 	collection := client.Database(os.Getenv(DatabaseName)).Collection(os.Getenv(ProblemCollection))
 
-	ctx, er := context.WithTimeout(context.Background(), 10*time.Second)
-
-	if er != nil {
-		log.Println("Request timeout")
-	}
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
 	e := collection.FindOne(ctx, filter).Decode(&p)
 
