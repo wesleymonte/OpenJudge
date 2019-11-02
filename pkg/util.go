@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -38,4 +39,9 @@ func CreateSubmissionsFolder() {
 	if err != nil {
 		log.Fatal("Error while create submission folder: " + err.Error())
 	}
+}
+
+func GetRandomUUID() string {
+	var id uuid.UUID = uuid.New()
+	return id.String()
 }
