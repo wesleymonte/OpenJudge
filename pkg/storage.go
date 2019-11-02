@@ -26,6 +26,11 @@ func SetUp(ctx context.Context) {
 	log.Println("Connected with the storage")
 }
 
+func checkCollections() {
+	// CHECK IF EXISTS PROBLEM COLLECTION AND SUBMISSION COLLECTION
+}
+
+
 func SaveProblem(p Problem) (interface{}, error){
 	collection := client.Database(os.Getenv(DatabaseName)).Collection(os.Getenv(ProblemCollection))
 
@@ -56,5 +61,16 @@ func RetrieveProblem(problemId string) (*Problem, error) {
 
 	return &p, e
 
+}
+
+func SaveSubmission(submission Submission) (*mongo.InsertOneResult, error) {
+	collection := client.Database(os.Getenv(DatabaseName)).Collection(os.Getenv(SubmissionCollection))
+	if collection == nil {
+		log.Println("Collection is nil!")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return collection.InsertOne(ctx, &submission)
 }
 

@@ -21,8 +21,8 @@ const GetSubmissionEndpoint = "/problems/{id}/submissions/{s_id}"
 
 func init() {
 	log.Println("Starting pss...")
-
 	pkg.ValidateEnv()
+	pkg.CreateSubmissionsFolder()
 }
 
 func main() {
@@ -42,6 +42,7 @@ func main() {
 	router.HandleFunc(GetVersionEndpoint, handler.GetVersion).Methods("GET")
 	router.HandleFunc(RegisterProblemEndpoint, handler.RegisterProblem).Methods("POST")
 	router.HandleFunc(GetProblemEndpoint, handler.RetrieveProblem).Methods("GET")
+	router.HandleFunc(SubmitProblemEndpoint, handler.SubmitProblem).Methods("POST")
 
 	server := &http.Server{
 		Addr:         ":8080",

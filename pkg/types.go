@@ -1,5 +1,9 @@
 package pkg
 
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
 //ADD VALIDATE
 type Problem struct {
 	TimeLimit   int64      `json:"time_limit" bson:"time_limit"`
@@ -10,6 +14,12 @@ type Problem struct {
 type TestCase struct {
 	In  string `json:"in" bson:"in"`
 	Out string `json:"out" bson:"out"`
+}
+
+type Submission struct {
+	ID 			primitive.ObjectID 	`json:"id" bson:"_id"`
+	ProblemId 	string				`json:"problem_id" bson:"problem_id"`
+	State 		string				`json:"state" bson:"state"`
 }
 
 type Version struct {
