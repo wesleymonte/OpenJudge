@@ -65,12 +65,23 @@ func RetrieveProblem(problemId string) (*Problem, error) {
 
 func SaveSubmission(submission Submission) (*mongo.InsertOneResult, error) {
 	collection := client.Database(os.Getenv(DatabaseName)).Collection(os.Getenv(SubmissionCollection))
-	if collection == nil {
-		log.Println("Collection is nil!")
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	return collection.InsertOne(ctx, &submission)
+}
+
+func UpdateStateSubmission(submission Submission) (*mongo.UpdateResult, error) {
+	filter := bson.M{"_id":submission.ID}
+	update := bson.D{{"$set",
+		bson.D{
+			{"state", submission.State},
+		},
+	}}
+	collection := client.Database(os.Getenv(DatabaseName)).Collection(os.Getenv(SubmissionCollection))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return collection.UpdateOne(ctx, filter, update)
 }
 
