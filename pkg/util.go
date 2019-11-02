@@ -10,6 +10,7 @@ import (
 const DatabaseAddress = "DATABASE_ADDRESS"
 const DatabaseName = "DATABASE_NAME"
 const ProblemCollection = "PROBLEM_COLLECTION"
+const SubmissionCollection = "SUBMISSION_COLLECTION"
 const SubmissionsDirName = "submissions"
 
 func ValidateEnv() {
