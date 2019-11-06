@@ -17,6 +17,19 @@ func (p *Processor) Run() {
 	go p.runUpdateRoutine()
 }
 
+func (p *Processor) startJudge(judgeName string) {
+	for _, j := range p.Judges {
+		name := j.Name
+		if judgeName == name {
+			//if id, err := j.Start(Spec{Image:"ubuntu"}); err != nil {
+			//	log.Println("Error while start judge: " + err.Error())
+		} else {
+			//log.Println("Started judge [" + id + "]")
+		}
+
+	}
+}
+
 func (p *Processor) runSubmitRoutine() {
 	for {
 		select {

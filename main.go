@@ -18,6 +18,7 @@ const RegisterProblemEndpoint = "/problems"
 const GetProblemEndpoint = "/problems/{id}"
 const SubmitProblemEndpoint = "/problems/{id}/submissions"
 const GetSubmissionEndpoint = "/problems/{id}/submissions/{s_id}"
+const StartContainer = "/container"
 
 func init() {
 	log.Println("Starting pss...")
@@ -43,6 +44,7 @@ func main() {
 	router.HandleFunc(RegisterProblemEndpoint, handler.RegisterProblem).Methods("POST")
 	router.HandleFunc(GetProblemEndpoint, handler.RetrieveProblem).Methods("GET")
 	router.HandleFunc(SubmitProblemEndpoint, handler.SubmitProblem).Methods("POST")
+	router.HandleFunc(StartContainer, handler.RunProcessor).Methods("POST")
 
 	server := &http.Server{
 		Addr:         ":8080",
