@@ -1,7 +1,6 @@
 package pkg
 
 import (
-	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -29,20 +28,25 @@ func ValidateEnv() {
 }
 
 func CreateSubmissionsFolder() {
-	_, err := os.Stat(SubmissionsDirName)
-	if os.IsNotExist(err) {
-		log.Println("Not found submissions folder")
-		if err := os.Mkdir(SubmissionsDirName, os.ModePerm); err != nil {
-			log.Fatal("Error while create submissions dir: " + err.Error())
-		}
-		return
-	}
+	err := CreateFolder(SubmissionsDirName)
 	if err != nil {
 		log.Fatal("Error while create submission folder: " + err.Error())
 	}
 }
 
-func GetRandomUUID() string {
-	var id uuid.UUID = uuid.New()
-	return id.String()
+func CreateFolder(dirName string) error {
+	_, err := os.Stat(dirName)
+	if os.IsExist(err) {
+		log.Println("Directory [" + dirName + "] already exists ")
+		return nil
+	}
+	if os.IsNotExist(err) {
+		log.Println("Creating directory [" + dirName + "]")
+		if err := os.MkdirAll(dirName, os.ModePerm); err != nil {
+			log.Println("Error while create directory [" + dirName + "]")
+			return err
+		}
+		return nil
+	}
+	return err
 }

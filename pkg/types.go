@@ -6,6 +6,7 @@ import (
 
 //ADD VALIDATE
 type Problem struct {
+	ID 			primitive.ObjectID 	`json:"id" bson:"_id"`
 	TimeLimit   int64      `json:"time_limit" bson:"time_limit"`
 	MemoryLimit int64      `json:"memory_limit" bson:"memory_limit"`
 	TestCases   []TestCase `json:"test_cases" bson:"test_cases"`

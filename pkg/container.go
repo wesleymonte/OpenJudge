@@ -2,45 +2,60 @@ package pkg
 
 import (
 	"context"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	dclient "github.com/docker/docker/client"
 	"log"
+	"os/exec"
 	"time"
 )
+
+const (
+	DockerEngine string = "/usr/bin/docker"
+	ExecCommand string = "exec"
+	CopyCommand string = "cp"
+)
+
 
 type Spec struct {
 	Name string
 	Image string
-	Mounts []Mount
+	Mounts []ProblemMount
 }
 
-type Mount struct {
+type ProblemMount struct {
 	Source string
 	Target string
 	ReadOnly bool
 }
 
-func (m *Mount) toDockerMount () mount.Mount {
-	var mount mount.Mount = mount.Mount{
+func (m *ProblemMount) toDockerMount () mount.Mount {
+	var dockerMount mount.Mount = mount.Mount{
 		Type:     "bind",
 		Source:   m.Source,
 		Target:   m.Target,
-		ReadOnly: false,
+		ReadOnly: m.ReadOnly,
 	}
-	return mount
+	return dockerMount
+}
+
+func NewProblemMount(problemId string) ProblemMount {
+	source := fmt.Sprintf("./problems/%s", problemId)
+	target := fmt.Sprintf("./%s", problemId)
+	var problemMount = ProblemMount{
+		Source:   source,
+		Target:   target,
+		ReadOnly: true,
+	}
+	return problemMount
 }
 
 
-func Start(spec Spec) error {
+func Start(cli *dclient.Client, spec Spec) (err error) {
 	log.Println("Starting Container [" + spec.Name + "]")
 	ctx := context.Background()
-	cli, err := dclient.NewEnvClient()
-	if err != nil {
-		return err
-	}
-
 	m := make([]mount.Mount, 0, len(spec.Mounts))
 	for _, _m := range spec.Mounts {
 		m = append(m, _m.toDockerMount())
@@ -55,80 +70,61 @@ func Start(spec Spec) error {
 		Tty:     true,
 	}
 
-	if resp, err := cli.ContainerCreate(ctx, &config, &hostConfig, nil, spec.Name); err != nil {
+	if _, err = cli.ContainerCreate(ctx, &config, &hostConfig, nil, spec.Name); err != nil {
 		log.Println("Error while creating container [" + spec.Name + "]")
 	} else {
 		log.Println("Successfully created container [" + spec.Name + "]")
-		if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-			return err
+		if err = cli.ContainerStart(ctx, spec.Name, types.ContainerStartOptions{}); err != nil {
+			log.Println("Error while try start container [" + spec.Name + "]")
 		} else {
 			log.Println("Started container [" + spec.Name + "]")
 		}
 	}
-	return err
+	return
 }
 
-func Stop(name string) error {
-	log.Println("Stopping Container [" + name + "]")
+func Stop(cli *dclient.Client, container string) (err error) {
+	log.Println("Stopping Container [" + container + "]")
 	ctx := context.Background()
-	cli, err := dclient.NewEnvClient()
-	if err != nil {
-		return err
-	}
-	var timeout time.Duration = time.Duration(5 * time.Second)
-	if err = cli.ContainerStop(ctx, name, &timeout); err != nil {
-		log.Println("Error while try stop container [" + name + "]")
-	}
-	if err = cli.ContainerRemove(ctx, name, types.ContainerRemoveOptions{}); err != nil {
-		log.Println("Error while try remove container [" + name + "]")
-		return err
-	}
-	return err
-}
-
-func Exec(container string, command string) error {
-	log.Println("Executing command [" + command + "] inside container [" + container + "]")
-	ctx := context.Background()
-	cli, err := dclient.NewEnvClient()
-	if err != nil {
-		return err
-	}
-	config := types.ExecConfig{
-		AttachStdout:true,
-		Detach:true,
-		Cmd:          []string{
-			"/bin/bash",
-			"-c",
-			command,
-		},
-	}
-
-	if response, err := cli.ContainerExecCreate(ctx, container, config); err != nil {
-		log.Println("Error while create exec instante to container [" + container + "]")
-		return err
+	var timeout = 5 * time.Second
+	if err = cli.ContainerStop(ctx, container, &timeout); err != nil {
+		log.Println("Error while try stop container [" + container + "]")
 	} else {
-		log.Println("Successful creation of exec instante to container [" + container + "]")
-		execId := response.ID
-		if hijacker, err := cli.ContainerExecAttach(ctx, execId, config); err != nil {
-			log.Println("Error while start exec instance [" + execId + "]")
+		log.Println("Successful container stop [" + container + "]")
+		if err = cli.ContainerRemove(ctx, container, types.ContainerRemoveOptions{}); err != nil {
+			log.Println("Error while try remove container [" + container + "]")
 		} else {
-			if err := cli.ContainerExecStart(ctx, execId, types.ExecStartCheck{}); err != nil {
-				log.Println("Error while start exec [" + execId + "]")
-			} else {
-				var p []byte = make([]byte, 0, 5000)
-				_, err := hijacker.Conn.Read(p)
-				if err != nil {
-					log.Println(err.Error())
-				}
-				//size := hijacker.Reader.Size()
-				//_, err = hijacker.Reader.Read(p)
-				//if err != nil {
-				//	log.Println(err.Error())
-				//}
-				s := string(p)
-				log.Println("Output:\n" + s)
-			}
+			log.Println("Successful container remove")
 		}
-		return err
 	}
+	return
+}
+
+func Exec(container string, command string) (out []byte, err error) {
+	log.Println("Executing command [" + command + "] inside container [" + container + "]")
+	if out, err = exec.Command(DockerEngine, ExecCommand, "-t", container , command).Output(); err != nil {
+		log.Println("Error while executing command [" + command + "] to container [" + container + "]")
+	} else {
+		log.Println("Successful command execution")
+	}
+	return
+}
+
+func Mkdir(container, dir string) (err error) {
+	if err = exec.Command(DockerEngine, "exec", "-t", container, "mkdir", dir).Run(); err != nil {
+		log.Println("Error while creating folder")
+	} else {
+		log.Println("Successful folder creation")
+	}
+	return
+}
+
+func Send(container, src, des string) (err error) {
+	log.Println("Sending [" + src + "] to [" + des + "] container [" + container + "].")
+	if err = exec.Command(DockerEngine, CopyCommand, src, container + ":" + des).Run(); err != nil {
+		log.Println("Error while sending file [" + src + "]")
+	} else {
+		log.Println("Successful send file")
+	}
+	return
 }
