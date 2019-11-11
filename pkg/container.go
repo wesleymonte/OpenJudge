@@ -129,14 +129,13 @@ func Send(container, src, des string) (err error) {
 	return
 }
 
-func Run(container, problemId, submissionId string) []byte {
+func Run(container, problemId, submissionId string) (result []byte, err error) {
 	testsPath := fmt.Sprintf("./problems/%s", problemId)
 	scriptPath := "./" + SubmissionsDirName + "/" + "submission-" + submissionId + ".py"
-	if out, err := exec.Command(DockerEngine, ExecCommand, "-t", container, "run.sh", testsPath, scriptPath).Output(); err != nil {
+	if result, err = exec.Command(DockerEngine, ExecCommand, "-t", container, "run.sh", testsPath, scriptPath).Output(); err != nil {
 		log.Println("Error while executing run.sh to container [" + container + "]")
 	} else {
 		log.Println("Successful command execution")
-		return out
 	}
-	return nil
+	return
 }

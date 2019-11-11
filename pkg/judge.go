@@ -10,10 +10,15 @@ import (
 type Judge struct {
 	Name string
 	in chan Submission
-	out chan Submission
+	out chan Status
 }
 
-func New(name string, in chan Submission, out chan Submission) *Judge {
+type Status struct {
+	SubmissionId string
+	Result string
+}
+
+func New(name string, in chan Submission, out chan Status) *Judge {
 	j := new(Judge)
 	j.Name = name
 	j.in = in
@@ -25,12 +30,17 @@ func (j *Judge) Run() {
 	for {
 		select {
 		case s := <-j.in:
-			j.submit(&s)
+			status, err := j.submit(&s)
+			if err != nil {
+				log.Println("Error while judge submission [" + s.ID.Hex() + "]: " + err.Error())
+			} else {
+				j.out <- status
+			}
 		}
 	}
 }
 
-func (j *Judge) submit(s *Submission) (err error){
+func (j *Judge) submit(s *Submission) (status Status, err error){
 	cli, _ := dclient.NewEnvClient()
 	var problem *Problem
 	problem, err = RetrieveProblem(s.ProblemId)
@@ -40,6 +50,12 @@ func (j *Judge) submit(s *Submission) (err error){
 	if err = j.loadProblem(problem); err != nil {return}
 	if err = j.start(cli, problem.ID.Hex(), "ubuntu"); err != nil {return}
 	if err = j.sendScript(s.ID.Hex()); err != nil {return}
+	if result, err := j.runScript(problem.ID.Hex(), s.ID.Hex()); err == nil {
+		status = Status{
+			SubmissionId: s.ID.Hex(),
+			Result:       result,
+		}
+	}
 	if err = j.stop(cli); err != nil {return}
 	return
 }
@@ -92,9 +108,11 @@ func (j *Judge) sendScript(submissionId string) (err error) {
 	return
 }
 
-func (j *Judge) runScript(problemId, submissionId string) (err error) {
-	result := Run(j.Name, problemId, submissionId)
-
+func (j *Judge) runScript(problemId, submissionId string) (result string, err error) {
+	var bresult []byte
+	bresult, err = Run(j.Name, problemId, submissionId)
+	result = string(bresult)
+	return
 }
 
 func (j *Judge) stop(cli *dclient.Client) (err error) {
