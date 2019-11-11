@@ -71,11 +71,11 @@ func SaveSubmission(submission Submission) (*mongo.InsertOneResult, error) {
 	return collection.InsertOne(ctx, &submission)
 }
 
-func UpdateStateSubmission(submission Submission) (*mongo.UpdateResult, error) {
-	filter := bson.M{"_id":submission.ID}
+func UpdateStateSubmission(submissionId, state string) (*mongo.UpdateResult, error) {
+	filter := bson.M{"_id":submissionId}
 	update := bson.D{{"$set",
 		bson.D{
-			{"state", submission.State},
+			{"state", state},
 		},
 	}}
 	collection := client.Database(os.Getenv(DatabaseName)).Collection(os.Getenv(SubmissionCollection))
