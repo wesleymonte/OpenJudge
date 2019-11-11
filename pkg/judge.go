@@ -64,6 +64,7 @@ func (j *Judge) loadProblem(problem *Problem) (err error){
 		file, _ = os.Create(outputFilePath)
 		_, _ = file.Write([]byte(t.Out))
 	}
+	return
 }
 
 func (j *Judge) start(cli *dclient.Client, problemId string, image string) (err error){
@@ -75,8 +76,8 @@ func (j *Judge) start(cli *dclient.Client, problemId string, image string) (err 
 	}
 	if err = Start(cli, spec); err != nil {
 		log.Println("Error while starting judge")
-		return
 	}
+	return
 }
 
 func (j *Judge) sendScript(submissionId string) (err error) {
@@ -89,6 +90,11 @@ func (j *Judge) sendScript(submissionId string) (err error) {
 		}
 	}
 	return
+}
+
+func (j *Judge) runScript(problemId, submissionId string) (err error) {
+	result := Run(j.Name, problemId, submissionId)
+
 }
 
 func (j *Judge) stop(cli *dclient.Client) (err error) {

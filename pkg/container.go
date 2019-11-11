@@ -111,7 +111,7 @@ func Exec(container string, command string) (out []byte, err error) {
 }
 
 func Mkdir(container, dir string) (err error) {
-	if err = exec.Command(DockerEngine, "exec", "-t", container, "mkdir", dir).Run(); err != nil {
+	if err = exec.Command(DockerEngine, ExecCommand, "-t", container, "mkdir", dir).Run(); err != nil {
 		log.Println("Error while creating folder")
 	} else {
 		log.Println("Successful folder creation")
@@ -127,4 +127,16 @@ func Send(container, src, des string) (err error) {
 		log.Println("Successful send file")
 	}
 	return
+}
+
+func Run(container, problemId, submissionId string) []byte {
+	testsPath := fmt.Sprintf("./problems/%s", problemId)
+	scriptPath := "./" + SubmissionsDirName + "/" + "submission-" + submissionId + ".py"
+	if out, err := exec.Command(DockerEngine, ExecCommand, "-t", container, "run.sh", testsPath, scriptPath).Output(); err != nil {
+		log.Println("Error while executing run.sh to container [" + container + "]")
+	} else {
+		log.Println("Successful command execution")
+		return out
+	}
+	return nil
 }
