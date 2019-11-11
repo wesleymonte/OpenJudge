@@ -34,6 +34,15 @@ func CreateSubmissionsFolder() {
 	}
 }
 
+func CreateFolders(dirNames ...string) (err error) {
+	for _, dir := range dirNames {
+		if err = CreateFolder(dir); err != nil {
+			break
+		}
+	}
+	return
+}
+
 func CreateFolder(dirName string) error {
 	_, err := os.Stat(dirName)
 	if os.IsExist(err) {
