@@ -7,4 +7,4 @@ fi
 
 tag=$1
 
-docker build -t wesleymonte/judge-python:${tag} .
+docker build -t wesleymonte/judge-python:${tag} -f docker/Dockerfile .
