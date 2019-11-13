@@ -10,6 +10,7 @@ const DatabaseAddress = "DATABASE_ADDRESS"
 const DatabaseName = "DATABASE_NAME"
 const ProblemCollection = "PROBLEM_COLLECTION"
 const SubmissionCollection = "SUBMISSION_COLLECTION"
+const ServiceAbsolutePath = "SERVICE_ABSOLUTE_PATH"
 const SubmissionsDirName = "submissions"
 
 func ValidateEnv() {
@@ -22,6 +23,8 @@ func ValidateEnv() {
 		log.Fatal("No storage address on the env")
 	} else if _, exists := os.LookupEnv(DatabaseName); !exists {
 		log.Fatal("No storage name on the env")
+	} else if _, exists := os.LookupEnv(ServiceAbsolutePath); !exists {
+		log.Fatal("No service absolute path on the env")
 	} else {
 		log.Println("Environment loaded with success")
 	}

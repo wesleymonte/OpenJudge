@@ -15,6 +15,13 @@ const ScriptFileNamePattern = "submission-"
 const PythonExtension = ".py"
 //const CPlusPlusExtension = ".cpp"
 
+var started bool = false
+var DefaultProcessor = pkg.NewProcessor(5)
+
+func Init() {
+	DefaultProcessor.Run()
+}
+
 func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -34,6 +41,8 @@ func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 		ProblemId: problemId, State: "CREATED"}
 
 	_, err = pkg.SaveSubmission(submission)
+
+	DefaultProcessor.In <- submission
 
 	if err != nil {
 		log.Println("Error while save submission")

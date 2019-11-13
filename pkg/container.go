@@ -8,6 +8,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	dclient "github.com/docker/docker/client"
 	"log"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -42,8 +43,8 @@ func (m *ProblemMount) toDockerMount () mount.Mount {
 }
 
 func NewProblemMount(problemId string) ProblemMount {
-	source := fmt.Sprintf("./problems/%s", problemId)
-	target := fmt.Sprintf("./%s", problemId)
+	source := fmt.Sprintf(os.Getenv(ServiceAbsolutePath) + "/problems/%s", problemId)
+	target := fmt.Sprintf("/problems/%s", problemId)
 	var problemMount = ProblemMount{
 		Source:   source,
 		Target:   target,
@@ -77,7 +78,7 @@ func Start(cli *dclient.Client, spec Spec) (err error) {
 		if err = cli.ContainerStart(ctx, spec.Name, types.ContainerStartOptions{}); err != nil {
 			log.Println("Error while try start container [" + spec.Name + "]")
 		} else {
-			log.Println("Started container [" + spec.Name + "]")
+			log.Println("Successfully started container [" + spec.Name + "]")
 		}
 	}
 	return
@@ -130,8 +131,8 @@ func Send(container, src, des string) (err error) {
 }
 
 func Run(container, problemId, submissionId string) (result []byte, err error) {
-	testsPath := fmt.Sprintf("./problems/%s", problemId)
-	scriptPath := "./" + SubmissionsDirName + "/" + "submission-" + submissionId + ".py"
+	testsPath := fmt.Sprintf("/problems/%s", problemId)
+	scriptPath := "/" + SubmissionsDirName + "/" + "submission-" + submissionId + ".py"
 	if result, err = exec.Command(DockerEngine, ExecCommand, "-t", container, "run.sh", testsPath, scriptPath).Output(); err != nil {
 		log.Println("Error while executing run.sh to container [" + container + "]")
 	} else {

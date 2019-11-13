@@ -64,6 +64,9 @@ func (j *Judge) loadProblem(problem *Problem) (err error){
 	dir := fmt.Sprintf("./problems/%s", problem.ID.Hex())
 	inputDir := dir + "/in"
 	outputDir := dir + "/out"
+	if _, err = os.Stat(dir); err == nil {
+		return
+	}
 	if err = CreateFolders(inputDir, outputDir); err != nil {
 		log.Println("Error while creating input/output directory")
 		return
