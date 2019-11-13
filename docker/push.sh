@@ -7,4 +7,4 @@ fi
 
 tag=$1
 
-sudo docker push wesleymonte/judge-python:${tag} .
+sudo docker push wesleymonte/judge-python:${tag}
