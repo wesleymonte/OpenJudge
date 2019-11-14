@@ -15,22 +15,22 @@ fi
 
 mkdir -p results
 
-for file in `find ${TESTS_PATH}/in/*.in` 
+for file in $(find "${TESTS_PATH}"/in/*.in)
 do
-    echo $file
-    output=`basename $file`
+    echo "$file"
+    output=$(basename "$file")
     output=${output%%.*}.out
-    python ${SCRIPT_PATH} < $file >| ./results/$output
-    echo ./results/$output
+    python2 "${SCRIPT_PATH}" < "$file" >| ./results/"$output"
+    echo ./results/"$output"
 done
 
-for file in `find ./results/*.out`
+for file in $(find ./results/*.out)
 do
-    echo $file
-    output=`basename $file`
-    dif=`diff -Z $file ${TESTS_PATH}/out/$output`
+    echo "$file"
+    output=$(basename "$file")
+    dif=$(diff -Z "$file" "${TESTS_PATH}"/out/"$output")
     echo "DIFF: $dif" 
-    if [ ! -z "$dif" ]; then
+    if [ -n "$dif" ]; then
         echo "WA" >| result
         echo "WA"
         break
