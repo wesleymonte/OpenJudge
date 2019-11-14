@@ -5,12 +5,11 @@ import (
 	dclient "github.com/docker/docker/client"
 	"log"
 	"os"
+	"time"
 )
 
 type Judge struct {
 	Name string
-	in chan Submission
-	out chan Status
 }
 
 type Status struct {
@@ -18,24 +17,25 @@ type Status struct {
 	Result string
 }
 
-func New(name string, in chan Submission, out chan Status) *Judge {
+func New(name string) *Judge {
 	j := new(Judge)
 	j.Name = name
-	j.in = in
-	j.out = out
 	return j
 }
 
-func (j *Judge) Run() {
+func (j *Judge) Run(in chan Submission, out chan Status) {
 	for {
 		select {
-		case s := <-j.in:
+		case s := <-in:
 			status, err := j.submit(&s)
 			if err != nil {
 				log.Println("Error while judge submission [" + s.ID.Hex() + "]: " + err.Error())
 			} else {
-				j.out <- status
+				out <- status
 			}
+		default:
+			log.Println(j.Name + " is slepping...")
+			time.Sleep(5 * time.Second)
 		}
 	}
 }
@@ -43,18 +43,18 @@ func (j *Judge) Run() {
 func (j *Judge) submit(s *Submission) (status Status, err error){
 	cli, _ := dclient.NewEnvClient()
 	var problem *Problem
+	var result string
 	problem, err = RetrieveProblem(s.ProblemId)
 	if err != nil {
 		log.Println("Error while retrieve problem [" + s.ProblemId + "]: " + err.Error())
 	}
 	if err = j.loadProblem(problem); err != nil {return}
-	if err = j.start(cli, problem.ID.Hex(), "ubuntu"); err != nil {return}
+	if err = j.start(cli, problem.ID.Hex(), "wesleymonte/judge-python"); err != nil {return}
 	if err = j.sendScript(s.ID.Hex()); err != nil {return}
-	if result, err := j.runScript(problem.ID.Hex(), s.ID.Hex()); err == nil {
-		status = Status{
-			SubmissionId: s.ID.Hex(),
-			Result:       result,
-		}
+	if result, err = j.runScript(problem.ID.Hex(), s.ID.Hex()); err != nil {return}
+	status = Status{
+		SubmissionId: s.ID.Hex(),
+		Result:       result,
 	}
 	if err = j.stop(cli); err != nil {return}
 	return
@@ -112,9 +112,10 @@ func (j *Judge) sendScript(submissionId string) (err error) {
 }
 
 func (j *Judge) runScript(problemId, submissionId string) (result string, err error) {
-	var bresult []byte
-	bresult, err = Run(j.Name, problemId, submissionId)
-	result = string(bresult)
+	var output []byte
+	_, err = Run(j.Name, problemId, submissionId)
+	output, err = GetResult(j.Name)
+	result = string(output)
 	return
 }
 

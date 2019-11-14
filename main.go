@@ -23,7 +23,6 @@ func init() {
 	log.Println("Starting pss...")
 	pkg.ValidateEnv()
 	pkg.CreateSubmissionsFolder()
-	handler.Init()
 }
 
 func main() {

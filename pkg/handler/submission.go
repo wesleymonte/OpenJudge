@@ -15,12 +15,7 @@ const ScriptFileNamePattern = "submission-"
 const PythonExtension = ".py"
 //const CPlusPlusExtension = ".cpp"
 
-var started bool = false
-var DefaultProcessor = pkg.NewProcessor(5)
-
-func Init() {
-	DefaultProcessor.Run()
-}
+var DefaultProcessor = pkg.NewProcessor(10)
 
 func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

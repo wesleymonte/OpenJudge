@@ -3,7 +3,6 @@ package pkg
 import (
 	"fmt"
 	"log"
-	"time"
 )
 
 type Processor struct {
@@ -14,63 +13,32 @@ type Processor struct {
 }
 
 func NewProcessor(judges int) (p *Processor) {
-	var In, jc = make(chan Submission), make(chan Submission)
+	var in =  make(chan Submission)
 	var out = make(chan Status)
 	var js []Judge
 	for i := 0; i < judges; i++ {
-		j := Judge{
+		log.Println(fmt.Sprintf("Creating judge-%d", i + 1))
+		j := &Judge{
 			Name: fmt.Sprintf("judge-%d", i + 1),
-			in:   jc,
-			out:  out,
 		}
-		js = append(js, j)
+		log.Println("Starting judge [" + j.Name + "]")
+		go j.Run(in, out)
+		js = append(js, *j)
 	}
 	p = &Processor{
-		In:     In,
+		In:     in,
 		out:    out,
-		jc:     jc,
 		Judges: js,
 	}
+	go updateRoutine(p.out)
 	return
 }
 
-func (p *Processor) Run() {
-	go p.wakeUpJudges()
-	go p.runSubmitRoutine()
-	go p.runUpdateRoutine()
-}
-
-func (p *Processor) wakeUpJudges() {
-	for _, j := range p.Judges {
-		log.Println("Starting judge [" + j.Name + "]")
-		j.Run()
-		log.Println("Started judge [" + j.Name + "]")
-	}
-}
-
-func (p *Processor) runSubmitRoutine() {
-	for {
-		select {
-		case s := <- p.In:
-			p.jc <- s
-		default:
-			log.Println("Empty queue.")
-			time.Sleep(5 * time.Second)
-		}
-	}
-}
-
-func (p *Processor) runUpdateRoutine() {
-	for {
-		select {
-		case s := <- p.out:
-			_, err := UpdateStateSubmission(s.SubmissionId, s.Result)
-			if err != nil {
-				log.Println("Error while update submission state [" + s.SubmissionId + "]")
-			}
-		default:
-			log.Println("Empty result queue.")
-			time.Sleep(5 * time.Second)
+func updateRoutine(out <- chan Status) {
+	for s:= range out {
+		_, err := UpdateStateSubmission(s.SubmissionId, s.Result)
+		if err != nil {
+			log.Println("Error while update submission state [" + s.SubmissionId + "]")
 		}
 	}
 }

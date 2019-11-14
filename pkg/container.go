@@ -133,10 +133,20 @@ func Send(container, src, des string) (err error) {
 func Run(container, problemId, submissionId string) (result []byte, err error) {
 	testsPath := fmt.Sprintf("/problems/%s", problemId)
 	scriptPath := "/" + SubmissionsDirName + "/" + "submission-" + submissionId + ".py"
-	if result, err = exec.Command(DockerEngine, ExecCommand, "-t", container, "run.sh", testsPath, scriptPath).Output(); err != nil {
+	if result, err = exec.Command(DockerEngine, ExecCommand, "-t", container, "bash", "run.sh", scriptPath, testsPath).Output(); err != nil {
 		log.Println("Error while executing run.sh to container [" + container + "]")
 	} else {
 		log.Println("Successful command execution")
+	}
+	return
+}
+
+func GetResult(container string) (result [] byte, err error) {
+	log.Println("Getting result...")
+	if result, err = exec.Command(DockerEngine, ExecCommand, "-t", container , "cat", "result").Output(); err != nil {
+		log.Println("Error while getting result from container [" + container + "]")
+	} else {
+		log.Println("Result get successfully")
 	}
 	return
 }
