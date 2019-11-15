@@ -49,9 +49,10 @@ func submitToProcessor(file multipart.File, submission pkg.Submission) {
 	err := writeScriptFile(file, submission.ID.Hex())
 	if err != nil {
 		log.Println("Error while write script file")
-		pkg.UpdateStateSubmission(submission.ID.Hex(), "FAILED")
+		_, _ = pkg.UpdateStateSubmission(submission.ID.Hex(), "ERROR")
 	}
 	DefaultProcessor.In <- submission
+	_, _ = pkg.UpdateStateSubmission(submission.ID.Hex(), "SUBMITTED")
 }
 
 func writeScriptFile(multiPartFile multipart.File, submissionId string) error {

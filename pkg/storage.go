@@ -90,7 +90,8 @@ func RetrieveSubmission(submissionId string) (*Submission, error) {
 }
 
 func UpdateStateSubmission(submissionId, state string) (*mongo.UpdateResult, error) {
-	filter := bson.M{"_id":submissionId}
+	id, _ := primitive.ObjectIDFromHex(submissionId)
+	filter := bson.M{"_id":id}
 	update := bson.D{{"$set",
 		bson.D{
 			{"state", state},

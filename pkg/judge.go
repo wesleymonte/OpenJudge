@@ -27,9 +27,11 @@ func (j *Judge) Run(in chan Submission, out chan Status) {
 	for {
 		select {
 		case s := <-in:
+			_, _ = UpdateStateSubmission(s.ID.Hex(), "RUNNING")
 			status, err := j.submit(&s)
 			if err != nil {
 				log.Println("Error while judge submission [" + s.ID.Hex() + "]: " + err.Error())
+				_, _ = UpdateStateSubmission(s.ID.Hex(), "FAILED")
 			} else {
 				out <- status
 			}
