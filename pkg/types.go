@@ -21,6 +21,7 @@ type Submission struct {
 	ID 			primitive.ObjectID 	`json:"id" bson:"_id"`
 	ProblemId 	string				`json:"problem_id" bson:"problem_id"`
 	State 		string				`json:"state" bson:"state"`
+	Result 		string				`json:"result" bson:"result"`
 }
 
 type Version struct {
