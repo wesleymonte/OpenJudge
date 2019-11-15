@@ -15,31 +15,29 @@ const ScriptFileNamePattern = "submission-"
 const PythonExtension = ".py"
 //const CPlusPlusExtension = ".cpp"
 
+var DefaultProcessor = pkg.NewProcessor(10)
+
 func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	problemId := mux.Vars(r)["id"]
 	submissionId :=  primitive.NewObjectID()
 
-	err := writeScriptFile(r, submissionId.Hex())
-
-	if err != nil {
-		log.Println("Error while write script file")
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	submission := pkg.Submission{
 		ID:        submissionId,
 		ProblemId: problemId, State: "CREATED"}
 
-	_, err = pkg.SaveSubmission(submission)
-
+	_, err := pkg.SaveSubmission(submission)
 	if err != nil {
 		log.Println("Error while save submission")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	var file multipart.File
+	file, err = loadScriptFile(r)
+	go submitToProcessor(file, submission)
+
 	log.Println("Created submission [" + submissionId.Hex() + "] to problem [" + problemId + "]")
 	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write([]byte(`{ "message": "Successful upload", "submission_id":"` +  submissionId.Hex() + `" }`)); err != nil {
@@ -47,13 +45,16 @@ func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func writeScriptFile(r *http.Request, submissionId string) error {
-	multiPartFile, err := loadScriptFile(r)
-
+func submitToProcessor(file multipart.File, submission pkg.Submission) {
+	err := writeScriptFile(file, submission.ID.Hex())
 	if err != nil {
-		return err
+		log.Println("Error while write script file")
+		pkg.UpdateStateSubmission(submission.ID.Hex(), "FAILED")
 	}
+	DefaultProcessor.In <- submission
+}
 
+func writeScriptFile(multiPartFile multipart.File, submissionId string) error {
 	var fileName string = ScriptFileNamePattern + submissionId + PythonExtension
 	var filePath string = pkg.SubmissionsDirName + "/" + fileName
 	file, err := os.Create(filePath)
