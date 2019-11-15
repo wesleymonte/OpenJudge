@@ -13,8 +13,8 @@ type Problem struct {
 }
 
 type TestCase struct {
-	In  string `json:"in" bson:"in"`
-	Out string `json:"out" bson:"out"`
+	In  string `json:"input" bson:"input"`
+	Out string `json:"output" bson:"output"`
 }
 
 type Submission struct {
