@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io/ioutil"
@@ -42,6 +43,28 @@ func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write([]byte(`{ "message": "Successful upload", "submission_id":"` +  submissionId.Hex() + `" }`)); err != nil {
 		log.Println(err.Error())
+	}
+}
+
+func RetrieveSubmission(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	params := mux.Vars(r)
+
+	submissionId := params["id"]
+
+	submission, err := pkg.RetrieveSubmission(submissionId)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		if _, err := w.Write([]byte(`{ "message": "` + err.Error() + `" }`)); err != nil {
+			log.Println(err.Error())
+		}
+	} else {
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(submission); err != nil {
+			log.Println(err.Error())
+		}
 	}
 }
 
