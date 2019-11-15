@@ -104,3 +104,18 @@ func UpdateStateSubmission(submissionId, state string) (*mongo.UpdateResult, err
 	return collection.UpdateOne(ctx, filter, update)
 }
 
+func UpdateResultSubmission(submissionId, result string) (*mongo.UpdateResult, error) {
+	id, _ := primitive.ObjectIDFromHex(submissionId)
+	filter := bson.M{"_id":id}
+	update := bson.D{{"$set",
+		bson.D{
+			{"result", result},
+		},
+	}}
+	collection := client.Database(os.Getenv(DatabaseName)).Collection(os.Getenv(SubmissionCollection))
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return collection.UpdateOne(ctx, filter, update)
+}
+

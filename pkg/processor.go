@@ -37,6 +37,7 @@ func NewProcessor(judges int) (p *Processor) {
 func updateRoutine(out <- chan Status) {
 	for s := range out {
 		_, err := UpdateStateSubmission(s.SubmissionId, "FINISHED")
+		_, err = UpdateResultSubmission(s.SubmissionId, s.Result)
 		if err != nil {
 			log.Println("Error while update submission state [" + s.SubmissionId + "]")
 		}

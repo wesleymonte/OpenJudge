@@ -5,6 +5,7 @@ import (
 	dclient "github.com/docker/docker/client"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -56,7 +57,7 @@ func (j *Judge) submit(s *Submission) (status Status, err error){
 	if result, err = j.runScript(problem.ID.Hex(), s.ID.Hex()); err != nil {return}
 	status = Status{
 		SubmissionId: s.ID.Hex(),
-		Result:       result,
+		Result:       strings.TrimSpace(result),
 	}
 	if err = j.stop(cli); err != nil {return}
 	return
