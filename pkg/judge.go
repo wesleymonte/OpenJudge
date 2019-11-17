@@ -47,12 +47,18 @@ func (j *Judge) submit(s *Submission) (status Status, err error){
 	cli, _ := dclient.NewEnvClient()
 	var problem *Problem
 	var result string
+	var image string
 	problem, err = RetrieveProblem(s.ProblemId)
 	if err != nil {
 		log.Println("Error while retrieve problem [" + s.ProblemId + "]: " + err.Error())
 	}
+	if image == "cplusplus" {
+		image = "wesleymonte/judge-cplusplus"
+	} else {
+		image = "wesleymonte/judge-python"
+	}
 	if err = j.loadProblem(problem); err != nil {return}
-	if err = j.start(cli, problem.ID.Hex(), "wesleymonte/judge-python"); err != nil {return}
+	if err = j.start(cli, problem.ID.Hex(), image); err != nil {return}
 	if err = j.sendScript(s.ID.Hex()); err != nil {return}
 	if result, err = j.runScript(problem.ID.Hex(), s.ID.Hex()); err != nil {return}
 	status = Status{
