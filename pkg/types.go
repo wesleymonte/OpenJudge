@@ -20,6 +20,7 @@ type TestCase struct {
 type Submission struct {
 	ID 			primitive.ObjectID 	`json:"id" bson:"_id"`
 	ProblemId 	string				`json:"problem_id" bson:"problem_id"`
+	Language	string				`json:"language" bson:"language"`
 	State 		string				`json:"state" bson:"state"`
 	Result 		string				`json:"result" bson:"result"`
 }
