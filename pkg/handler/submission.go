@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io/ioutil"
@@ -14,7 +15,7 @@ import (
 
 const ScriptFileNamePattern = "submission-"
 const PythonExtension = ".py"
-//const CPlusPlusExtension = ".cpp"
+const CPlusPlusExtension = ".cpp"
 
 var DefaultProcessor = pkg.NewProcessor(10)
 
@@ -23,10 +24,13 @@ func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 
 	problemId := mux.Vars(r)["id"]
 	submissionId :=  primitive.NewObjectID()
+	language := r.Header.Get("Language")
 
 	submission := pkg.Submission{
 		ID:        submissionId,
-		ProblemId: problemId, State: "CREATED"}
+		ProblemId: problemId,
+		Language: language,
+		State: "CREATED"}
 
 	_, err := pkg.SaveSubmission(submission)
 	if err != nil {
@@ -69,7 +73,7 @@ func RetrieveSubmission(w http.ResponseWriter, r *http.Request) {
 }
 
 func submitToProcessor(file multipart.File, submission pkg.Submission) {
-	err := writeScriptFile(file, submission.ID.Hex())
+	err := writeScriptFile(file, submission.ID.Hex(), submission.Language)
 	if err != nil {
 		log.Println("Error while write script file")
 		_, _ = pkg.UpdateStateSubmission(submission.ID.Hex(), "ERROR")
@@ -78,8 +82,16 @@ func submitToProcessor(file multipart.File, submission pkg.Submission) {
 	_, _ = pkg.UpdateStateSubmission(submission.ID.Hex(), "SUBMITTED")
 }
 
-func writeScriptFile(multiPartFile multipart.File, submissionId string) error {
-	var fileName string = ScriptFileNamePattern + submissionId + PythonExtension
+func writeScriptFile(multiPartFile multipart.File, submissionId, language string) error {
+	var fileName string
+	if language == "cplusplus" {
+		fileName = ScriptFileNamePattern + submissionId + CPlusPlusExtension
+	} else if language == "python" {
+		fileName = ScriptFileNamePattern + submissionId + PythonExtension
+	} else {
+		return errors.New("Not found language type")
+	}
+
 	var filePath string = pkg.SubmissionsDirName + "/" + fileName
 	file, err := os.Create(filePath)
 
