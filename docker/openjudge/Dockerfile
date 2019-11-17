@@ -4,8 +4,8 @@ WORKDIR /service
 
 EXPOSE 8080
 
-COPY open-judge /service
+COPY openjudge /service
 
-RUN ["/bin/sh", "-c", "chmod +x open-judge"]
+RUN ["/bin/sh", "-c", "chmod +x openjudge"]
 
-ENTRYPOINT ["./open-judge"]
+ENTRYPOINT ["./openjudge"]
