@@ -1,0 +1,26 @@
+---
+- hosts: judge-machine
+  vars:
+    setup_env: bash -x setup.sh
+    deploy: bash -x deploy.sh
+  tasks:
+    - name: Copy Config File
+      copy: src="{{ judge_config_file_path }}" dest="{{ remote_user }}"
+
+    - name: Copy Setup Script
+      copy: src="../scripts/setup.sh" dest="{{ remote_user }}"
+
+    - name: Copy Deploy Script
+      copy: src="../scripts/deploy.sh" dest="{{ remote_user }}"
+
+    - name: Setting up environment
+      shell: "{{ setup_env }}"
+      become: yes
+
+    - name: Deploy Services
+      shell: "{{ deploy }}"
+      become: yes
+
+    - name: Cleaning up
+      shell: rm -rf .ansible/ deploy.sh setup.sh
+      become: yes
