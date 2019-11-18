@@ -12,6 +12,8 @@ const ProblemCollection = "PROBLEM_COLLECTION"
 const SubmissionCollection = "SUBMISSION_COLLECTION"
 const ServiceAbsolutePath = "SERVICE_ABSOLUTE_PATH"
 const SubmissionsDirName = "submissions"
+const PythonExtension = ".py"
+const CPlusPlusExtension = ".cpp"
 
 func ValidateEnv() {
 	err := godotenv.Load("judge.env")

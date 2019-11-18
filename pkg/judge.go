@@ -59,7 +59,7 @@ func (j *Judge) submit(s *Submission) (status Status, err error){
 	}
 	if err = j.loadProblem(problem); err != nil {return}
 	if err = j.start(cli, problem.ID.Hex(), image); err != nil {return}
-	if err = j.sendScript(s.ID.Hex()); err != nil {return}
+	if err = j.sendScript(s.ID.Hex(), s.Language); err != nil {return}
 	if result, err = j.runScript(problem.ID.Hex(), s.ID.Hex()); err != nil {return}
 	status = Status{
 		SubmissionId: s.ID.Hex(),
@@ -108,8 +108,13 @@ func (j *Judge) start(cli *dclient.Client, problemId string, image string) (err 
 	return
 }
 
-func (j *Judge) sendScript(submissionId string) (err error) {
-	var scriptPath = "./" + SubmissionsDirName + "/" + "submission-" + submissionId + ".py"
+func (j *Judge) sendScript(submissionId, language string) (err error) {
+	var scriptPath = "./" + SubmissionsDirName + "/" + "submission-" + submissionId
+	if language == "cplusplus" {
+		scriptPath += CPlusPlusExtension
+	} else if language == "python" {
+		scriptPath += PythonExtension
+	}
 	if err = Mkdir(j.Name, SubmissionsDirName); err != nil {
 		log.Println("Error while creating submissions directory to judge [" + j.Name + "]")
 	} else {

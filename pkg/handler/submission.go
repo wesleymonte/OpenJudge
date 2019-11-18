@@ -14,8 +14,6 @@ import (
 )
 
 const ScriptFileNamePattern = "submission-"
-const PythonExtension = ".py"
-const CPlusPlusExtension = ".cpp"
 
 var DefaultProcessor = pkg.NewProcessor(10)
 
@@ -85,9 +83,9 @@ func submitToProcessor(file multipart.File, submission pkg.Submission) {
 func writeScriptFile(multiPartFile multipart.File, submissionId, language string) error {
 	var fileName string
 	if language == "cplusplus" {
-		fileName = ScriptFileNamePattern + submissionId + CPlusPlusExtension
+		fileName = ScriptFileNamePattern + submissionId + pkg.CPlusPlusExtension
 	} else if language == "python" {
-		fileName = ScriptFileNamePattern + submissionId + PythonExtension
+		fileName = ScriptFileNamePattern + submissionId + pkg.PythonExtension
 	} else {
 		return errors.New("Not found language type")
 	}
