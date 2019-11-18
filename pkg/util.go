@@ -14,7 +14,7 @@ const ServiceAbsolutePath = "SERVICE_ABSOLUTE_PATH"
 const SubmissionsDirName = "submissions"
 
 func ValidateEnv() {
-	err := godotenv.Load()
+	err := godotenv.Load("judge.env")
 	if err != nil {
 		log.Println("No .env file specified")
 	}
