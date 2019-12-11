@@ -1,0 +1,7 @@
+[judge-machine]
+
+[judge-machine:vars]
+ansible_ssh_private_key_file=
+ansible_python_interpreter=/usr/bin/python3
+judge_config_file_path=
+remote_user=

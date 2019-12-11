@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -10,19 +11,17 @@ import (
 	"pss/pkg"
 	"pss/pkg/handler"
 	"time"
-	"github.com/gorilla/mux"
 )
 
 const GetVersionEndpoint = "/version"
 const RegisterProblemEndpoint = "/problems"
-const GetProblemEndpoint = "/problems/{id}"
-const SubmitProblemEndpoint = "/problems/{id}/submissions"
-const GetSubmissionEndpoint = "/problems/{id}/submissions/{s_id}"
+const ProblemEndpoint = "/problems/{id}"
+const GetSubmissionEndpoint = "/submissions/{id}"
 
 func init() {
 	log.Println("Starting pss...")
-
 	pkg.ValidateEnv()
+	pkg.CreateSubmissionsFolder()
 }
 
 func main() {
@@ -41,7 +40,9 @@ func main() {
 
 	router.HandleFunc(GetVersionEndpoint, handler.GetVersion).Methods("GET")
 	router.HandleFunc(RegisterProblemEndpoint, handler.RegisterProblem).Methods("POST")
-	router.HandleFunc(GetProblemEndpoint, handler.RetrieveProblem).Methods("GET")
+	router.HandleFunc(ProblemEndpoint, handler.RetrieveProblem).Methods("GET")
+	router.HandleFunc(ProblemEndpoint, handler.SubmitProblem).Methods("POST")
+	router.HandleFunc(GetSubmissionEndpoint, handler.RetrieveSubmission).Methods("GET")
 
 	server := &http.Server{
 		Addr:         ":8080",

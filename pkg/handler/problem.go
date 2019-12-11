@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"log"
-	"pss/pkg"
 	"net/http"
-	"encoding/json"
+	"pss/pkg"
 )
 
 func RegisterProblem( w http.ResponseWriter, r *http.Request) {
