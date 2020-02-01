@@ -80,6 +80,6 @@ echo "Path to add configuration files: $PATH_VM"
 # Run ansible
 readonly DEPLOY_YML_FILE="deploy-judge.yml"
 
-(cd ${ANSIBLE_FILES_PATH} && sudo ansible-playbook -vvv ${DEPLOY_YML_FILE})
+(cd ${ANSIBLE_FILES_PATH} && ansible-playbook -vvv ${DEPLOY_YML_FILE})
 
 exit 0

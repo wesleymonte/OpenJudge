@@ -13,7 +13,7 @@ if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
 fi
 
 # shellcheck disable=SC2046
-docker run -itd -v $(pwd)/.env:/service/.env \
+docker run -itd -v $(pwd)/judge.env:/service/judge.env \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v /usr/bin/docker:/usr/bin/docker \
                 --net=host \
