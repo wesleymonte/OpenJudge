@@ -1,4 +1,4 @@
-module pss
+module github.com/wesleymonte/openjudge
 
 go 1.13
 

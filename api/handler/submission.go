@@ -4,18 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
+	"github.com/wesleymonte/openjudge/openjudge"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
-	"pss/pkg"
 )
 
 const ScriptFileNamePattern = "submission-"
 
-var DefaultProcessor = pkg.NewProcessor(10)
+var DefaultProcessor = openjudge.NewProcessor(10)
 
 func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -24,13 +24,13 @@ func SubmitProblem(w http.ResponseWriter, r *http.Request) {
 	submissionId :=  primitive.NewObjectID()
 	language := r.Header.Get("Language")
 
-	submission := pkg.Submission{
+	submission := openjudge.Submission{
 		ID:        submissionId,
 		ProblemId: problemId,
 		Language: language,
 		State: "CREATED"}
 
-	_, err := pkg.SaveSubmission(submission)
+	_, err := openjudge.SaveSubmission(submission)
 	if err != nil {
 		log.Println("Error while save submission")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -55,7 +55,7 @@ func RetrieveSubmission(w http.ResponseWriter, r *http.Request) {
 
 	submissionId := params["id"]
 
-	submission, err := pkg.RetrieveSubmission(submissionId)
+	submission, err := openjudge.RetrieveSubmission(submissionId)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -70,27 +70,27 @@ func RetrieveSubmission(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func submitToProcessor(file multipart.File, submission pkg.Submission) {
+func submitToProcessor(file multipart.File, submission openjudge.Submission) {
 	err := writeScriptFile(file, submission.ID.Hex(), submission.Language)
 	if err != nil {
 		log.Println("Error while write script file")
-		_, _ = pkg.UpdateStateSubmission(submission.ID.Hex(), "ERROR")
+		_, _ = openjudge.UpdateStateSubmission(submission.ID.Hex(), "ERROR")
 	}
 	DefaultProcessor.In <- submission
-	_, _ = pkg.UpdateStateSubmission(submission.ID.Hex(), "SUBMITTED")
+	_, _ = openjudge.UpdateStateSubmission(submission.ID.Hex(), "SUBMITTED")
 }
 
 func writeScriptFile(multiPartFile multipart.File, submissionId, language string) error {
 	var fileName string
 	if language == "cplusplus" {
-		fileName = ScriptFileNamePattern + submissionId + pkg.CPlusPlusExtension
+		fileName = ScriptFileNamePattern + submissionId + openjudge.CPlusPlusExtension
 	} else if language == "python" {
-		fileName = ScriptFileNamePattern + submissionId + pkg.PythonExtension
+		fileName = ScriptFileNamePattern + submissionId + openjudge.PythonExtension
 	} else {
 		return errors.New("Not found language type")
 	}
 
-	var filePath string = pkg.SubmissionsDirName + "/" + fileName
+	var filePath string = openjudge.SubmissionsDirName + "/" + fileName
 	file, err := os.Create(filePath)
 
 	if err != nil {

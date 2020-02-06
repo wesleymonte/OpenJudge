@@ -3,15 +3,15 @@ package handler
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/wesleymonte/openjudge/openjudge"
 	"log"
 	"net/http"
-	"pss/pkg"
 )
 
 func RegisterProblem( w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var p pkg.Problem
+	var p openjudge.Problem
 
 	err := json.NewDecoder(r.Body).Decode(&p)
 
@@ -19,7 +19,7 @@ func RegisterProblem( w http.ResponseWriter, r *http.Request) {
 		log.Println("Error while decode body to problem")
 	}
 
-	res, err := pkg.SaveProblem(p)
+	res, err := openjudge.SaveProblem(p)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -40,7 +40,7 @@ func RetrieveProblem(w http.ResponseWriter, r *http.Request) {
 
 	problemId := params["id"]
 
-	problem, err := pkg.RetrieveProblem(problemId)
+	problem, err := openjudge.RetrieveProblem(problemId)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

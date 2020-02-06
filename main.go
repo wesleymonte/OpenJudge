@@ -4,12 +4,12 @@ import (
 	"context"
 	"flag"
 	"github.com/gorilla/mux"
+	"github.com/wesleymonte/openjudge/api/handler"
+	"github.com/wesleymonte/openjudge/openjudge"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"pss/pkg"
-	"pss/pkg/handler"
 	"time"
 )
 
@@ -20,8 +20,8 @@ const GetSubmissionEndpoint = "/submissions/{id}"
 
 func init() {
 	log.Println("Starting pss...")
-	pkg.ValidateEnv()
-	pkg.CreateSubmissionsFolder()
+	openjudge.ValidateEnv()
+	openjudge.CreateSubmissionsFolder()
 }
 
 func main() {
@@ -34,7 +34,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), wait)
 	defer cancel()
 
-	pkg.SetUp(ctx)
+	openjudge.SetUp(ctx)
 
 	router := mux.NewRouter()
 
