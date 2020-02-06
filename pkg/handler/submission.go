@@ -10,7 +10,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"pss/pkg"
+	"github.com/wesleymonte/openjudge/pkg"
 )
 
 const ScriptFileNamePattern = "submission-"

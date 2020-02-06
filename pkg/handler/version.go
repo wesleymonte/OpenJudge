@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"pss/pkg"
+	"github.com/wesleymonte/openjudge/pkg"
 )
 
 const CurrentVersion = "0.0.1"

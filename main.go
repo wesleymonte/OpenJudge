@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"pss/pkg"
-	"pss/pkg/handler"
+	"github.com/wesleymonte/openjudge/pkg"
+	"github.com/wesleymonte/openjudge/pkg/handler"
 	"time"
 )
 

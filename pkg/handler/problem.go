@@ -5,7 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"pss/pkg"
+	"github.com/wesleymonte/openjudge/pkg"
 )
 
 func RegisterProblem( w http.ResponseWriter, r *http.Request) {
